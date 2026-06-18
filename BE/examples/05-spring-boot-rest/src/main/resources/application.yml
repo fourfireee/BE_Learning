@@ -1,0 +1,6 @@
+server:
+  port: 8080
+
+# 演示用配置：${ENV:默认值} —— 优先读环境变量，没有就用默认值（见配置篇）。
+app:
+  greeting: ${APP_GREETING:hello}

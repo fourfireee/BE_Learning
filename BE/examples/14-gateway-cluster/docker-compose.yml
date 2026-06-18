@@ -1,0 +1,41 @@
+# 一键起一个最小集群：1 个 Nginx 网关 + 3 个应用实例 + 1 个共享 Redis。
+# 对应文档：BE/14-集群负载均衡与网关.md
+#
+# 启动： docker compose up --build
+# 然后反复请求： curl localhost:8080/api/hit
+
+services:
+  redis:
+    image: redis:7-alpine
+    # 共享状态存这里，三个实例都连它
+
+  # 三个一模一样的应用实例，只有 INSTANCE_NAME 不同，方便观察请求落到了谁
+  app1:
+    build: ./app
+    environment:
+      INSTANCE_NAME: app1
+      REDIS_URL: redis://redis:6379
+    depends_on: [redis]
+
+  app2:
+    build: ./app
+    environment:
+      INSTANCE_NAME: app2
+      REDIS_URL: redis://redis:6379
+    depends_on: [redis]
+
+  app3:
+    build: ./app
+    environment:
+      INSTANCE_NAME: app3
+      REDIS_URL: redis://redis:6379
+    depends_on: [redis]
+
+  gateway:
+    image: nginx:1.27-alpine
+    # 把我们的 nginx.conf 挂进容器，替换默认站点配置
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "8080:80"   # 宿主机 8080 -> 网关 80，对外只暴露网关这一个入口
+    depends_on: [app1, app2, app3]

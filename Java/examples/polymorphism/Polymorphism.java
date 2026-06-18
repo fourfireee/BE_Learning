@@ -13,7 +13,7 @@ public class Polymorphism {
 
         // 同一句 s.area()，运行时会根据真实对象调用对应实现，这就是多态
         for (Shape s : shapes) {
-            System.out.println(s.name() + " 的面积 = " + s.area());
+            System.out.println(s.name() + " 的面积 = " + Shape.fmt(s.area()));
             System.out.println("  描述: " + s.describe());
         }
     }
@@ -24,13 +24,19 @@ interface Shape {
     double area();   // 抽象方法，实现类必须提供
     String name();
     String describe();
+
+    // 数字格式化：最多保留 2 位小数，并去掉末尾多余的 0（如 12.0 -> "12"，12.566 -> "12.57"）。
+    // 接口里的 static 方法是工具方法，用 Shape.fmt(...) 调用。
+    static String fmt(double v) {
+        return new java.text.DecimalFormat("#.##").format(v);
+    }
 }
 
 // 抽象类：提供部分公共实现，把差异留给子类
 abstract class BaseShape implements Shape {
     // 模板方法：复用逻辑，内部调用子类实现的 area()
     public String describe() {
-        return name() + " area=" + area();
+        return name() + " area=" + Shape.fmt(area());
     }
 }
 
